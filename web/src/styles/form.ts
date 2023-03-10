@@ -52,12 +52,20 @@ export const Label = styled.label`
   }
 `
 
-export const Input = styled.input`
-  height: 48px;
+type InputStyleProps = {
+  error?: boolean
+}
+
+export const Input = styled.input<InputStyleProps>`
+  height: 3rem;
   border-radius: 6px;
   padding: 0 1rem;
 
-  border: 1px solid ${(props) => props.theme.colors['base-alt-text']};
+  border: 1px solid
+    ${(props) =>
+      props.error
+        ? props.theme.colors.warning
+        : props.theme.colors['base-text']};
 
   color: ${(props) => props.theme.colors['base-text']};
   font-weight: 500;

@@ -49,6 +49,7 @@ export const Login = () => {
   const navigate = useNavigate()
 
   const [user, setUser] = useState<UserData>({} as UserData)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const {
     register,
@@ -104,10 +105,9 @@ export const Login = () => {
       const res = await api.post('/login', { username, password })
       setUser(res.data)
 
-      console.log('decoded token', res.data)
-
       navigate('/test')
     } catch (err) {
+      setErrorMessage('Usuário ou senha incorretos')
       console.error(err)
     }
   }
@@ -123,15 +123,26 @@ export const Login = () => {
       </Header>
       <FormWrapper>
         <Label>
-          <p>Username</p>
-          <Input type="text" {...register('username')} />
+          <p>Nome de usuário</p>
+          <Input
+            type="text"
+            required
+            {...register('username')}
+            error={!!errorMessage}
+          />
           {errors.username && (
             <ErrorMessage>{errors.username.message}</ErrorMessage>
           )}
+          {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         </Label>
         <Label>
-          <p>Password</p>
-          <Input type="password" {...register('password')} />
+          <p>Senha</p>
+          <Input
+            type="password"
+            required
+            {...register('password')}
+            error={!!errorMessage}
+          />
         </Label>
         {errors.password && (
           <ErrorMessage>{errors.password.message}</ErrorMessage>

@@ -18,6 +18,7 @@ import {
 } from '../../styles/form'
 import { api } from '../../lib/axios'
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 
 const loginFormSchema = z.object({
   username: z
@@ -30,12 +31,16 @@ const loginFormSchema = z.object({
   password: z
     .string()
     .min(6, { message: 'A senha precisa ter pelo menos 6 letras' }),
+  confirmPassword: z.string(),
 })
 
 type LoginFormData = z.infer<typeof loginFormSchema>
 
 export const Register = () => {
   const navigate = useNavigate()
+
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('')
+  const [registerErrorMessage, setRegisterErrorMessage] = useState('')
 
   const {
     register,
@@ -49,9 +54,15 @@ export const Register = () => {
   const username = watch('username')
   const email = watch('email')
   const password = watch('password')
+  const confirmPassword = watch('confirmPassword')
 
   async function handleRegister() {
     try {
+      if (password !== confirmPassword) {
+        setPasswordErrorMessage('As senhas não são iguais')
+        return
+      }
+
       const res = await api.post('/register', {
         email,
         username,
@@ -62,6 +73,7 @@ export const Register = () => {
       console.log('funcionou?')
       return res
     } catch (err) {
+      setRegisterErrorMessage('Email ou nome de usuário já existem')
       console.error(err)
     }
   }
@@ -77,25 +89,53 @@ export const Register = () => {
       </Header>
       <FormWrapper>
         <Label>
-          <p>Username</p>
-          <Input type="text" {...register('username')} />
+          <p>Nome de usuário</p>
+          <Input
+            type="text"
+            required
+            {...register('username')}
+            error={!!registerErrorMessage}
+          />
           {errors.username && (
             <ErrorMessage>{errors.username.message}</ErrorMessage>
+          )}
+          {registerErrorMessage && (
+            <ErrorMessage>{registerErrorMessage}</ErrorMessage>
           )}
         </Label>
         <Label>
           <p>Email</p>
-          <Input type="email" {...register('email')} />
+          <Input
+            type="email"
+            required
+            {...register('email')}
+            error={!!registerErrorMessage}
+          />
           {errors.username && (
             <ErrorMessage>{errors.username.message}</ErrorMessage>
           )}
         </Label>
         <Label>
-          <p>Password</p>
-          <Input type="password" {...register('password')} />
+          <p>Senha</p>
+          <Input type="password" required {...register('password')} />
         </Label>
         {errors.password && (
           <ErrorMessage>{errors.password.message}</ErrorMessage>
+        )}
+        <Label>
+          <p>Confirmar Senha</p>
+          <Input
+            type="password"
+            required
+            {...register('confirmPassword')}
+            error={!!passwordErrorMessage}
+          />
+        </Label>
+        {errors.password && (
+          <ErrorMessage>{errors.password.message}</ErrorMessage>
+        )}
+        {passwordErrorMessage && (
+          <ErrorMessage>{passwordErrorMessage}</ErrorMessage>
         )}
       </FormWrapper>
       <Button>Confirmar</Button>
