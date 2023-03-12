@@ -8,7 +8,8 @@ export const defaultTheme = {
     'base-text': '#494949',
     'base-alt-text': '#8692A6',
 
-    warning: '#FF6347',
+    warning: '#FC4737',
+    success: '#1B873F',
 
     white: '#fff',
   },

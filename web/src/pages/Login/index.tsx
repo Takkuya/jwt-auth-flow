@@ -105,7 +105,7 @@ export const Login = () => {
       const res = await api.post('/login', { username, password })
       setUser(res.data)
 
-      navigate('/test')
+      navigate('/users')
     } catch (err) {
       setErrorMessage('Usuário ou senha incorretos')
       console.error(err)

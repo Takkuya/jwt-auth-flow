@@ -10,7 +10,7 @@ export const GlobalStyle = styled.createGlobalStyle`
     font-family: 'Inter';
   }
 
-  :focus {
+  input:focus {
     outline: 0;
     box-shadow: 0 2px 10px 2px #00000022;
   }

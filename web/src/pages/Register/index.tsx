@@ -69,7 +69,7 @@ export const Register = () => {
         password,
       })
 
-      navigate('/login')
+      navigate('/users')
       console.log('funcionou?')
       return res
     } catch (err) {
@@ -111,9 +111,7 @@ export const Register = () => {
             {...register('email')}
             error={!!registerErrorMessage}
           />
-          {errors.username && (
-            <ErrorMessage>{errors.username.message}</ErrorMessage>
-          )}
+          {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
         </Label>
         <Label>
           <p>Senha</p>
