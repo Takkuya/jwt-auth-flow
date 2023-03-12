@@ -22,7 +22,7 @@ export const generateAccessToken = (user: UserData) => {
 export const generateRefreshToken = (user: UserData) => {
   return jwt.sign(
     { id: user.id, isAdmin: user.isAdmin },
-    process.env.REFRESH_TOKEN_SECRET,
+    process.env.REFRESH_TOKEN_SECRET,{expiresIn: '8h'}
   )
 }
 
@@ -47,7 +47,7 @@ export const verifyToken =  (
         next()
       })   
     } else {
-      res.status(401).json('You are not authenticated')
+      res.status(401).json('You are not authenticated verifyToken')
     }
   } catch (err) {
     console.error(err)

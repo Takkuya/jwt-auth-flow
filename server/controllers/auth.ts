@@ -9,6 +9,8 @@ let refreshTokens: string[] = []
 
 
 export const refresh = async (req: express.Request, res: express.Response) => {
+  console.log('rodando rota de refresh')
+
   try {
     const refreshToken = req.body.refreshToken
 
@@ -26,7 +28,7 @@ export const refresh = async (req: express.Request, res: express.Response) => {
 
 
     if (!refreshToken) {
-      return res.status(401).json('You are not authenticated')
+      return res.status(401).json('You are not authenticated refresh controller')
     }
 
     if (!refreshTokenDatabase) {
@@ -109,6 +111,7 @@ export const register = async (req: express.Request, res: express.Response) => {
       password: passwordHash,
     }
 
+    const accessToken = generateAccessToken(user)
     const refreshToken = generateRefreshToken(user)
 
     const hashedRefreshToken = bcrypt.hashSync(refreshToken, salt)
@@ -124,7 +127,12 @@ export const register = async (req: express.Request, res: express.Response) => {
 
     const createUser = await prisma.user.create({ data: newUser })
 
-    return res.status(201).json(createUser)
+    return res.status(201).json({  
+      username: user.username,
+      password: user.password,
+      accessToken,
+      refreshToken,
+    })
   } catch (err) {
     console.error(err)
     return res.status(500).json({ error: 'Internal server error' })
@@ -132,6 +140,8 @@ export const register = async (req: express.Request, res: express.Response) => {
 }
 
 export const login = async (req: express.Request, res: express.Response) => {
+  console.log('rodando rota de login')
+
   try {
     const { username, password } = req.body
 
