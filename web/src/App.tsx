@@ -4,16 +4,19 @@ import { ThemeProvider } from 'styled-components'
 import defaultTheme from './styles/themes/default'
 import { GlobalStyle } from './styles/global'
 import { AppContainer } from './AppStyle'
+import { AuthContextProvider } from './contexts/AuthContext'
 
 function App() {
   return (
     <BrowserRouter>
-      <ThemeProvider theme={defaultTheme}>
-        <AppContainer>
-          <MainRoutes />
-          <GlobalStyle />
-        </AppContainer>
-      </ThemeProvider>
+      <AuthContextProvider>
+        <ThemeProvider theme={defaultTheme}>
+          <AppContainer>
+            <MainRoutes />
+            <GlobalStyle />
+          </AppContainer>
+        </ThemeProvider>
+      </AuthContextProvider>
     </BrowserRouter>
   )
 }

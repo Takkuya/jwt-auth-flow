@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { AuthContext } from '../../contexts/AuthContext'
 import { api } from '../../lib/axios'
 import { UserData } from '../../pages/Users'
 import {
@@ -11,17 +12,19 @@ import {
 } from './styles'
 
 type UserCardProps = {
-  user: UserData
+  profile: UserData
 }
 
-export const UserCard = ({ user }: UserCardProps) => {
+export const UserCard = ({ profile }: UserCardProps) => {
   const [error, setError] = useState('')
 
-  console.log('usuário maneiro e legal', user)
+  const { user } = useContext(AuthContext)
 
   async function handleDeleteUser() {
     try {
-      const res = await api.delete(`/users/${user.id}`)
+      const res = await api.delete(`/users/${profile.id}`, {
+        headers: { authorization: 'Bearer ' + user.accessToken },
+      })
 
       console.log('usuário deletado')
 
@@ -35,7 +38,7 @@ export const UserCard = ({ user }: UserCardProps) => {
   return (
     <UserCardContainer>
       <InfoWrapper>
-        <Title>{user.username}</Title>
+        <Title>{profile.username}</Title>
         <DeleteButton onClick={handleDeleteUser}>Deletar</DeleteButton>
       </InfoWrapper>
       <MessageWrapper>

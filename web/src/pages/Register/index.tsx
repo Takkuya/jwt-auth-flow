@@ -18,7 +18,8 @@ import {
 } from '../../styles/form'
 import { api } from '../../lib/axios'
 import { useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useContext } from 'react'
+import { AuthContext } from '../../contexts/AuthContext'
 
 const loginFormSchema = z.object({
   username: z
@@ -41,6 +42,8 @@ export const Register = () => {
 
   const [passwordErrorMessage, setPasswordErrorMessage] = useState('')
   const [registerErrorMessage, setRegisterErrorMessage] = useState('')
+
+  const { setUser } = useContext(AuthContext)
 
   const {
     register,
@@ -68,6 +71,8 @@ export const Register = () => {
         username,
         password,
       })
+
+      setUser(res.data)
 
       navigate('/users')
       console.log('funcionou?')

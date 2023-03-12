@@ -2,7 +2,7 @@ import { GoogleLogo } from '@phosphor-icons/react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { api } from '../../lib/axios'
 // eslint-disable-next-line camelcase
 import jwt_decode from 'jwt-decode'
@@ -21,6 +21,7 @@ import {
   Title,
 } from '../../styles/form'
 import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '../../contexts/AuthContext'
 import axios from 'axios'
 
 const loginFormSchema = z.object({
@@ -48,7 +49,8 @@ type DecodedTokenData = {
 export const Login = () => {
   const navigate = useNavigate()
 
-  const [user, setUser] = useState<UserData>({} as UserData)
+  const { setUser } = useContext(AuthContext)
+
   const [errorMessage, setErrorMessage] = useState('')
 
   const {
@@ -63,44 +65,9 @@ export const Login = () => {
   const username = watch('username')
   const password = watch('password')
 
-  const refreshToken = async () => {
-    try {
-      const res = await api.post('/refresh', { tokeb: user.refreshToken })
-
-      setUser({
-        ...user,
-        accessToken: res.data.accessToken,
-        refreshToken: res.data.refreshToken,
-      })
-
-      return res.data
-    } catch (err) {
-      console.error(err)
-    }
-  }
-
-  const axiosJWT = axios.create()
-
-  // do something before every request
-  axiosJWT.interceptors.request.use(
-    // check is access token is expired
-    async (config) => {
-      const currentDate = new Date()
-      // checking access token expire date
-      const decodedToken: DecodedTokenData = jwt_decode(user.accessToken)
-
-      if (decodedToken.exp * 1000 < currentDate.getTime()) {
-        const data = await refreshToken()
-        config.headers.authorization = 'Bearer ' + data.accessToken
-      }
-      return config
-    },
-    (error) => {
-      return Promise.reject(error)
-    },
-  )
-
   async function handleLogin() {
+    console.log('asdasds')
+
     try {
       const res = await api.post('/login', { username, password })
       setUser(res.data)
