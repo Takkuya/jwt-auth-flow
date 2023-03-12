@@ -1,20 +1,17 @@
 import express from 'express'
 import {
-  deleteUser,
   login,
   logout,
   refresh,
   register,
 } from './controllers/auth'
+
+import { deleteUser,getUsers } from './controllers/users'
 import { verifyToken } from './middlewares/auth'
 
 export const routes = express.Router()
 
-routes.get('/', (req, res) => {
-  return res.status(200).json({
-    message: 'teste',
-  })
-})
+routes.get('/api', getUsers)
 
 routes.post('/api/refresh', refresh)
 

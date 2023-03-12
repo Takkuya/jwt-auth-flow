@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import express, { response } from 'express'
+import express from 'express'
 
 type UserData = {
   id: string
@@ -23,11 +23,10 @@ export const generateRefreshToken = (user: UserData) => {
   return jwt.sign(
     { id: user.id, isAdmin: user.isAdmin },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: '7d' }
   )
 }
 
-export const verifyToken = (
+export const verifyToken =  (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
@@ -36,20 +35,22 @@ export const verifyToken = (
     const authHeader = req.headers.authorization
 
     if (authHeader) {
-      const token = authHeader.split(' ')[1]
+      const accessToken = authHeader.split(' ')[1]
 
-      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+      jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err) {
+          console.error(err)
           return res.status(403).json('Token is not valid')
         }
 
         req.user = user
         next()
-      })
+      })   
     } else {
       res.status(401).json('You are not authenticated')
     }
   } catch (err) {
+    console.error(err)
     return res.status(500).json({ error: 'Internal server error' })
   }
 }
