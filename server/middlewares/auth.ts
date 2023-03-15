@@ -14,7 +14,7 @@ export const generateAccessToken = (user: UserData) => {
     { id: user.id, isAdmin: user.isAdmin },
     process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: '15m',
+      expiresIn: '15m'
     }
   )
 }
@@ -22,11 +22,12 @@ export const generateAccessToken = (user: UserData) => {
 export const generateRefreshToken = (user: UserData) => {
   return jwt.sign(
     { id: user.id, isAdmin: user.isAdmin },
-    process.env.REFRESH_TOKEN_SECRET,{expiresIn: '8h'}
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '8h' }
   )
 }
 
-export const verifyToken =  (
+export const verifyToken = (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
@@ -37,17 +38,29 @@ export const verifyToken =  (
     if (authHeader) {
       const accessToken = authHeader.split(' ')[1]
 
-      jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) {
-          console.error(err)
-          return res.status(403).json('Token is not valid')
-        }
+      jwt.verify(
+        accessToken,
+        process.env.ACCESS_TOKEN_SECRET,
+        (
+          err: jwt.VerifyErrors | null,
+          user: string | jwt.JwtPayload | undefined
+        ) => {
+          if (err?.name === 'TokenExpiredError') {
+            console.error('Token Expired', err)
+            return res.status(401).json('Token expired')
+          }
 
-        req.user = user
-        next()
-      })   
+          if (err) {
+            console.error(err)
+            return res.status(403).json('Token is not valid')
+          }
+
+          req.user = user
+          next()
+        }
+      )
     } else {
-      res.status(401).json('You are not authenticated verifyToken')
+      res.status(401).json('You are not authenticated')
     }
   } catch (err) {
     console.error(err)

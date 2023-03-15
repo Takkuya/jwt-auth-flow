@@ -5,30 +5,22 @@ import jwt from 'jsonwebtoken'
 import { generateAccessToken, generateRefreshToken } from '../middlewares/auth'
 import { prisma } from '../src/lib/prisma'
 
-let refreshTokens: string[] = []
-
-
 export const refresh = async (req: express.Request, res: express.Response) => {
-  console.log('rodando rota de refresh')
-
   try {
     const refreshToken = req.body.refreshToken
+    const databaseRefreshToken = await prisma.user.findFirst({
+      where: {
+        refreshToken: refreshToken
+      }
+    })
 
-   const databaseRefreshToken = await prisma.user.findUnique({
-    where: {
-      refreshToken: refreshToken
-    }
-   })
-
-   const refreshTokenDatabase = databaseRefreshToken?.refreshToken
-
-  //  const refreshTokenWithoutHash = bcrypt.compare(refreshToken, databaseRefreshToken?.refreshToken)
-
-  //  console.log("Refresh Token", refreshTokenWithoutHash)
-
+    const refreshTokenDatabase = databaseRefreshToken?.refreshToken
+    //  const refreshTokenWithoutHash = bcrypt.compare(refreshToken, databaseRefreshToken?.refreshToken)
 
     if (!refreshToken) {
-      return res.status(401).json('You are not authenticated refresh controller')
+      return res
+        .status(401)
+        .json('You are not authenticated')
     }
 
     if (!refreshTokenDatabase) {
@@ -43,15 +35,10 @@ export const refresh = async (req: express.Request, res: express.Response) => {
           console.log(err)
           res.status(403).json('Refresh token is not valid')
         } else {
-          // deleting refresh token
-          // refreshTokens = refreshTokens.filter(
-          //   (token) => token !== refreshToken
-          // )
-
           const newAccessToken = generateAccessToken(user)
           const newRefreshToken = generateRefreshToken(user)
 
-          // refreshTokens.push(newRefreshToken)
+          console.log('newRefreshToken', newRefreshToken)
 
           await prisma.user.update({
             where: {
@@ -59,13 +46,13 @@ export const refresh = async (req: express.Request, res: express.Response) => {
             },
             data: {
               refreshToken: newRefreshToken
-            },
+            }
           })
 
           // if everything is okay create a new access token and send this token to the user
           res.status(200).json({
             accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
+            refreshToken: newRefreshToken
           })
         }
       }
@@ -82,16 +69,15 @@ export const register = async (req: express.Request, res: express.Response) => {
 
     const databaseEmail = await prisma.user.findUnique({
       where: {
-        email: email,
-      },
+        email: email
+      }
     })
 
     const databaseUsername = await prisma.user.findUnique({
       where: {
-        username: username,
-      },
+        username: username
+      }
     })
-
 
     if (databaseEmail) {
       return res.status(409).json('This email is already in use')
@@ -108,7 +94,7 @@ export const register = async (req: express.Request, res: express.Response) => {
       id: uuidv4(),
       email,
       username,
-      password: passwordHash,
+      password: passwordHash
     }
 
     const accessToken = generateAccessToken(user)
@@ -127,11 +113,11 @@ export const register = async (req: express.Request, res: express.Response) => {
 
     const createUser = await prisma.user.create({ data: newUser })
 
-    return res.status(201).json({  
+    return res.status(201).json({
       username: user.username,
       password: user.password,
       accessToken,
-      refreshToken,
+      refreshToken
     })
   } catch (err) {
     console.error(err)
@@ -140,15 +126,13 @@ export const register = async (req: express.Request, res: express.Response) => {
 }
 
 export const login = async (req: express.Request, res: express.Response) => {
-  console.log('rodando rota de login')
-
   try {
     const { username, password } = req.body
 
     const user = await prisma.user.findUnique({
       where: {
-        username: username,
-      },
+        username: username
+      }
     })
 
     if (!user) {
@@ -164,24 +148,20 @@ export const login = async (req: express.Request, res: express.Response) => {
     const accessToken = generateAccessToken(user)
     const refreshToken = generateRefreshToken(user)
 
-    // delete after database implementation
-    //refreshTokens.push(refreshToken)
-
-
     await prisma.user.update({
       where: {
         id: user.id
       },
       data: {
         refreshToken: refreshToken
-      },
+      }
     })
 
     return res.json({
       username: user.username,
       password: user.password,
       accessToken,
-      refreshToken,
+      refreshToken
     })
   } catch (err) {
     console.error(err)
@@ -190,27 +170,16 @@ export const login = async (req: express.Request, res: express.Response) => {
 }
 
 export const logout = async (req: express.Request, res: express.Response) => {
-  console.log("Entrou na função logout")
-
   try {
     const refreshToken = req.body.refreshToken
-    // refreshTokens = refreshTokens.filter((token) => token !== refreshToken)
 
-    // i need to delete the refreshToken from the database in the future
-
-    // await prisma.user.deleteMany({
-    //   where: {
-    //     refreshToken: refreshToken
-    //   }
-    // })
-
-    await prisma.user.update({
+    await prisma.user.updateMany({
       where: {
         refreshToken: refreshToken
       },
       data: {
         refreshToken: ''
-      },
+      }
     })
 
     return res.status(200).json('Logged out')
@@ -219,4 +188,3 @@ export const logout = async (req: express.Request, res: express.Response) => {
     return res.status(500).json({ error: 'Internal server error' })
   }
 }
-

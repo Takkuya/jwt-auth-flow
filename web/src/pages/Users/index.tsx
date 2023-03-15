@@ -5,7 +5,7 @@ import { UserCard } from '../../components/UserCard'
 import { AuthContext } from '../../contexts/AuthContext'
 import { api } from '../../lib/axios'
 import { Header, LogoutButton, UsersContainer } from './styles'
-import jwt_decode from 'jwt-decode'
+import { axiosPrivate } from '../../lib/axiosPrivate'
 
 export type UserData = {
   email: string
@@ -15,14 +15,10 @@ export type UserData = {
   username: string
 }
 
-type DecodedTokenData = {
-  exp: number
-}
-
 export const Users = () => {
   const navigate = useNavigate()
 
-  const { user, setUser } = useContext(AuthContext)
+  const { user } = useContext(AuthContext)
 
   const [users, setUsers] = useState([])
 
@@ -32,18 +28,19 @@ export const Users = () => {
     setUsers(res.data)
   }
 
-  console.log('user', user)
-
   async function handleLogout() {
     try {
-      const res = await api.post(
+      const accessToken = JSON.parse(
+        localStorage.getItem('session')!,
+      ).accessToken
+
+      await axiosPrivate.post(
         '/logout',
         { refreshToken: user.refreshToken },
         {
-          headers: { authorization: 'Bearer ' + user.accessToken },
+          headers: { authorization: 'Bearer ' + accessToken },
         },
       )
-      console.log(res)
       navigate('/login')
     } catch (err) {
       console.error(err)
@@ -52,7 +49,7 @@ export const Users = () => {
 
   useEffect(() => {
     getUsers()
-  }, [])
+  }, [users, setUsers])
 
   return (
     <UsersContainer>

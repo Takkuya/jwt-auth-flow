@@ -22,7 +22,6 @@ import {
 } from '../../styles/form'
 import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../../contexts/AuthContext'
-import axios from 'axios'
 
 const loginFormSchema = z.object({
   username: z
@@ -34,17 +33,6 @@ const loginFormSchema = z.object({
 })
 
 type LoginFormData = z.infer<typeof loginFormSchema>
-
-type UserData = {
-  accessToken: string
-  password: string
-  refreshToken: string
-  username: string
-}
-
-type DecodedTokenData = {
-  exp: number
-}
 
 export const Login = () => {
   const navigate = useNavigate()
@@ -66,10 +54,15 @@ export const Login = () => {
   const password = watch('password')
 
   async function handleLogin() {
-    console.log('asdasds')
-
     try {
       const res = await api.post('/login', { username, password })
+      localStorage.setItem(
+        'session',
+        JSON.stringify({
+          accessToken: res.data.accessToken,
+          refreshToken: res.data.refreshToken,
+        }),
+      )
       setUser(res.data)
 
       navigate('/users')

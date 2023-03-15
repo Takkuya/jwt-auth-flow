@@ -1,7 +1,5 @@
-import axios from 'axios'
-import { useContext, useState } from 'react'
-import { AuthContext } from '../../contexts/AuthContext'
-import { api } from '../../lib/axios'
+import { useState } from 'react'
+import { axiosPrivate } from '../../lib/axiosPrivate'
 import { UserData } from '../../pages/Users'
 import {
   DeleteButton,
@@ -16,21 +14,22 @@ type UserCardProps = {
 }
 
 export const UserCard = ({ profile }: UserCardProps) => {
-  const [error, setError] = useState('')
-
-  const { user } = useContext(AuthContext)
+  const [errorMessage, setErrorMessage] = useState('')
 
   async function handleDeleteUser() {
     try {
-      const res = await api.delete(`/users/${profile.id}`, {
-        headers: { authorization: 'Bearer ' + user.accessToken },
+      const accessToken = JSON.parse(
+        localStorage.getItem('session')!,
+      ).accessToken
+
+      const res = await axiosPrivate.delete(`/users/${profile.id}`, {
+        headers: { authorization: 'Bearer ' + accessToken },
       })
 
-      console.log('usuário deletado')
-
+      alert('Usuário deletedo com sucesso')
       return res.data
     } catch (err) {
-      setError('Não foi possível deletar o usuário')
+      setErrorMessage('Não foi possível deletar o usuário')
       console.error(err)
     }
   }
@@ -42,11 +41,7 @@ export const UserCard = ({ profile }: UserCardProps) => {
         <DeleteButton onClick={handleDeleteUser}>Deletar</DeleteButton>
       </InfoWrapper>
       <MessageWrapper>
-        {error && <p className="error">{error}</p>}
-        {/* 
-        <p className="succesfull">
-          Usuário deletado com sucesso
-        </p> */}
+        {errorMessage && <p className="error">{errorMessage}</p>}
       </MessageWrapper>
     </UserCardContainer>
   )

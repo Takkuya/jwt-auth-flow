@@ -16,10 +16,10 @@ import {
   OAuthWrapper,
   Title,
 } from '../../styles/form'
-import { api } from '../../lib/axios'
 import { useNavigate } from 'react-router-dom'
 import { useState, useContext } from 'react'
 import { AuthContext } from '../../contexts/AuthContext'
+import { axiosPublic } from '../../lib/axiosPublic'
 
 const loginFormSchema = z.object({
   username: z
@@ -66,16 +66,22 @@ export const Register = () => {
         return
       }
 
-      const res = await api.post('/register', {
+      const res = await axiosPublic.post('/register', {
         email,
         username,
         password,
       })
 
+      localStorage.setItem(
+        'session',
+        JSON.stringify({
+          accessToken: res.data.accessToken,
+          refreshToken: res.data.refreshToken,
+        }),
+      )
       setUser(res.data)
 
       navigate('/users')
-      console.log('funcionou?')
       return res
     } catch (err) {
       setRegisterErrorMessage('Email ou nome de usuário já existem')
